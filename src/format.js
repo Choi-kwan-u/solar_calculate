@@ -25,12 +25,15 @@ export function approxWon(x) {
 /** 발전량 kWh: 100 미만은 소수 한 자리, 그 위는 유효숫자 3자리 */
 export const kwh = (x) => (Math.abs(x) < 100 ? x.toFixed(1) : sig3.format(x));
 
-/** 손익분기 → { main, sub }. range = [빨리 회수, 늦게 회수] 일수 */
+/**
+ * 손익분기 → { range, main, sub }. range = [빨리 회수, 늦게 회수] 일수.
+ * 범위가 먼저 크게("약 7~12년이면 본전"), 중앙값은 작게(VISUAL.md 8장).
+ */
 export function breakEven([fast, slow], mid) {
-  if (mid === 0) return { main: '바로 회수', sub: '보조금이 설치비보다 커요' };
-  if (!Number.isFinite(mid)) return { main: '회수 어려움', sub: '아끼는 전기요금이 없어요' };
+  if (mid === 0) return { range: '바로', main: '바로 본전', sub: '보조금이 설치비보다 커요' };
+  if (!Number.isFinite(mid)) return { range: '—', main: '본전을 찾기 어려워요', sub: '아끼는 전기요금이 없어요' };
   const a = Math.round(fast / 365);
   const b = Number.isFinite(slow) ? Math.round(slow / 365) : null;
-  const main = b === null ? `약 ${a}년 이상` : a === b ? `약 ${a}년` : `약 ${a}~${b}년`;
-  return { main, sub: `중앙 ${(mid / 365).toFixed(1)}년 · ${int(mid)}일` };
+  const range = b === null ? `약 ${a}년 이상` : a === b ? `약 ${a}년` : `약 ${a}~${b}년`;
+  return { range, main: `${range}이면 본전`, sub: `중앙 ${(mid / 365).toFixed(1)}년 · ${int(mid)}일` };
 }

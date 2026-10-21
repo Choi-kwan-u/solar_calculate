@@ -27,7 +27,8 @@ src/
   search.js       시군구 자동완성(초성·조합 중인 글자·옛 이름)
   chart.js        월별 막대 SVG
   format.js       숫자 표기(유효숫자, 만 원 단위)
-  fonts/pretendard/   Pretendard 가변 폰트 자체 호스팅(쓰는 글자 조각만 내려받음)
+  fonts/          SUIT·Barlow Condensed 자체 호스팅
+  icons/          Lucide 아이콘 3개(검색·화살표·경고)
 data/
   regions.json    시군구 256곳 대표 좌표 — build-regions 산출물
   psh.json        시군구별 월별·연평균 일사량 — build-psh 산출물, 사이트가 읽는 파일
@@ -53,6 +54,7 @@ npm run data:psh
 
 ## 설계 문서와 검증
 
+- [docs/VISUAL.md](docs/VISUAL.md) — 디자인(해 질 녘 지평선). 색·글꼴·그래프는 이 문서가 기준.
 - [docs/DESIGN.md](docs/DESIGN.md) — 설계(v2.1). 3.1·3.2 검산표는 `tests/calc.test.js`가 그대로 검사하므로, 상수나 식을 바꾸면 표를 다시 뽑아 문서와 테스트를 같이 고친다.
 - [docs/VALIDATION.md](docs/VALIDATION.md) — NASA 일사량 vs 지상 실측. 같은 기간 평균 +4%, 서울 +16%. 보정은 ASOS 2001~2025 대조 후 결정.
 
@@ -67,4 +69,5 @@ npm run data:psh
 - 일사량: [NASA POWER](https://power.larc.nasa.gov/) Climatology API (`ALLSKY_SFC_SW_DWN`, community=RE)
 - 행정구역 경계: [vuski/admdongkor](https://github.com/vuski/admdongkor)
 - 요금: 한전 주택용 저압 요금표(2026-07)
-- 글꼴: [Pretendard](https://github.com/orioncactus/pretendard) — SIL Open Font License 1.1 (`src/fonts/pretendard/LICENSE.txt`)
+- 글꼴: [SUIT](https://github.com/sun-typeface/SUIT)·[Barlow Condensed](https://github.com/jpt/barlow) — SIL Open Font License 1.1 (`src/fonts/*/LICENSE.txt`), 자체 호스팅
+- 아이콘: [Lucide](https://lucide.dev) — ISC (`src/icons/LICENSE.txt`)

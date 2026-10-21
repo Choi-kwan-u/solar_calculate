@@ -1,12 +1,13 @@
 // 입력 바인딩과 렌더. 계산은 calc.js, 숫자 표기는 format.js에 있다.
 
-import './fonts/pretendard/pretendardvariable-dynamic-subset.css';
+import './fonts/fonts.css';
 import './style.css';
 import data from '../data/psh.json';
 import { calculate, maxUsefulPanels, subsidyEstimate, subsidyOf, usageFromBill, DAYS } from './calc.js';
 import { DEFAULTS, ORIENTATION, PANELS, SHADE, TARIFF } from './constants.js';
 import { buildIndex, mountSearch } from './search.js';
-import { renderChart } from './chart.js';
+import { renderHorizon, renderMonthly } from './chart.js';
+import { mountIcons } from './icons/index.js';
 import { approxWon, breakEven, int, kwh, roundSig, won } from './format.js';
 
 const $ = (id) => document.getElementById(id);
@@ -56,9 +57,9 @@ const calcConsts = () => ({
 
 const span = (className, text) => Object.assign(document.createElement('span'), { className, textContent: text });
 
-// 숫자 전환은 200ms 페이드만(설계 6.2). 처음 그릴 때는 안 한다.
+// 숫자·선 전환은 150ms 페이드만(VISUAL.md 7장). 처음 그릴 때는 안 한다.
 function fade(el) {
-  if (motionOK() && el.animate) el.animate([{ opacity: 0.2 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' });
+  if (motionOK() && el.animate) el.animate([{ opacity: 0.3 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' });
 }
 
 function setText(el, text) {
@@ -164,18 +165,19 @@ function renderInputs() {
     + '시·도·군 보조금도 받는다면 합친 금액을 넣으세요 — 지역에 따라 자부담이 크게 줄어요.';
 }
 
-let lastMonthly = null;
+let last = null;          // 마지막 결과 — 창 크기가 바뀌면 그래프만 다시 그린다
+let sunShown = false;     // 해가 떠오르는 움직임은 처음 한 번만
 
 function renderResults() {
   const region = state.region;
-  $('results').classList.toggle('is-empty', !region);
-  if (!region) {
-    for (const id of ['r-day-kwh', 'r-month-kwh', 'r-year-kwh', 'r-day-won', 'r-month-won', 'r-year-won']) setValue($(id), '—', '');
-    setText($('r-be'), '—');
-    setText($('r-be-sub'), '');
-    $('hint-bill').hidden = $('hint-more').hidden = $('hint-life').hidden = $('surplus').hidden = true;
-    lastMonthly = null;
-    renderChart($('chart'), null);
+  const ok = region && Array.isArray(region.monthly) && region.monthly.length === 12;
+  $('results').classList.toggle('is-empty', !ok);
+  $('monthly-block').hidden = !ok;
+  if (!ok) {
+    $('empty-msg').textContent = region ? '이 지역은 일사량 데이터가 없어요. 가까운 시군구로 골라 주세요.' : '지역을 고르면 바로 계산해요';
+    $('surplus').hidden = true;
+    last = null;
+    updateBar();
     $('steps').replaceChildren(Object.assign(document.createElement('li'), { textContent: '지역을 고르면 계산 과정이 여기 나와요.' }));
     return;
   }
@@ -188,13 +190,14 @@ function renderResults() {
   setValue($('r-day-kwh'), kwh(m.dailyKwh), 'kWh');
   setValue($('r-month-kwh'), kwh(m.monthlyAvgKwh), 'kWh');
   setValue($('r-year-kwh'), kwh(m.yearlyKwh), 'kWh');
-  setValue($('r-day-won'), ...approxWon(m.dailyWon), '약');
-  setValue($('r-month-won'), ...approxWon(m.monthlyWon), '약');
-  setValue($('r-year-won'), ...approxWon(m.yearlyWon), '약');
+  setValue($('r-day-won'), ...approxWon(m.dailyWon));
+  setValue($('r-month-won'), ...approxWon(m.monthlyWon));
+  setValue($('r-year-won'), ...approxWon(m.yearlyWon));
 
   const be = breakEven(r.breakEvenRange, m.breakEvenDays);
   setText($('r-be'), be.main);
   setText($('r-be-sub'), be.sub);
+  $('bar-range').textContent = be.range;
 
   const finite = Number.isFinite(m.breakEvenDays) && m.breakEvenDays > 0;
   const [fast, slow] = r.breakEvenRange.map((d) => Math.round(d / 365));
@@ -205,11 +208,52 @@ function renderResults() {
   $('hint-life').textContent = `패널 수명(${c.panelLifeYears}년) 안에 본전을 찾기 어려워요`;
 
   renderSurplus(m, input, c);
-  lastMonthly = m.monthlyKwh;
-  renderChart($('chart'), lastMonthly);
+  const years = m.breakEvenDays / 365;
+  const costText = approxWon(m.totalCost).join('');
+  last = {
+    horizon: {
+      cost: m.totalCost,
+      yearly: [r.low.yearlyWon, m.yearlyWon, r.high.yearlyWon],
+      costLabel: `${m.subsidy > 0 ? '자부담' : '설치비'} ${costText}`,
+      sunLabel: m.breakEvenDays === 0 ? '바로 본전' : `약 ${Math.round(years)}년`,
+      summary: Number.isFinite(years)
+        ? `누적 절감액이 ${m.subsidy > 0 ? '자부담' : '설치비'} ${costText}을 넘는 시점: ${be.range}(중앙 ${years.toFixed(1)}년)`
+        : '절감액이 없어 본전을 찾기 어려워요',
+    },
+    monthly: m.monthlyKwh,
+    usage: m.usage,
+  };
+  drawCharts({ animate: !sunShown && motionOK(), fadeIn: sunShown });
+  sunShown = true;
   renderSteps(r, c);
-  $('live').textContent = `하루 ${kwh(m.dailyKwh)}kWh, 절감액 약 ${approxWon(m.dailyWon).join('')}. 손익분기 ${be.main}.`;
+  updateBar();
+  $('live').textContent = `하루 ${kwh(m.dailyKwh)}kWh, 절감액 약 ${approxWon(m.dailyWon).join('')}. ${be.main}.`;
 }
+
+function drawCharts({ animate = false, fadeIn = false } = {}) {
+  if (!last) return;
+  renderHorizon($('horizon'), last.horizon, { animate });
+  const hasExtra = renderMonthly($('chart'), last.monthly, last.usage);
+  $('lg-usage').hidden = last.usage == null;
+  $('lg-usage-v').textContent = last.usage != null ? `${int(last.usage)}kWh` : '';
+  $('lg-extra').hidden = !hasExtra;
+  if (fadeIn) { fade($('horizon')); fade($('chart')); }
+}
+
+// 모바일 하단 고정 바: 위치를 고른 뒤, 결과가 화면 밖에 있을 때만(VISUAL.md 4장)
+let resultsVisible = false;
+function updateBar() {
+  const show = !!last && !resultsVisible;
+  $('bottom-bar').hidden = !show;
+  document.body.classList.toggle('has-bar', show);
+}
+new IntersectionObserver(([e]) => { resultsVisible = e.isIntersecting; updateBar(); }, { threshold: 0.15 })
+  .observe($('results'));
+$('bottom-bar').addEventListener('click', () => {
+  $('results').scrollIntoView({ block: 'start', behavior: motionOK() ? 'smooth' : 'auto' });
+  $('r-be').setAttribute('tabindex', '-1');
+  $('r-be').focus({ preventScroll: true });
+});
 
 // 설계 6.5: 매년 쌓이기만 하는 잉여가 있으면 경고 + 적정 장수
 function renderSurplus(m, input, c) {
@@ -364,13 +408,17 @@ $('hint-more').addEventListener('click', () => {
   target.scrollIntoView(scrollOpts());
 });
 
-// 차트는 실제 폭으로 다시 그린다(글자 크기가 viewBox 배율에 휘둘리지 않게)
+// 그래프는 실제 폭으로 다시 그린다(글자 크기가 viewBox 배율에 휘둘리지 않게)
 let raf = 0;
-new ResizeObserver(() => {
+let lastWidth = 0;
+new ResizeObserver(([e]) => {
+  if (Math.round(e.contentRect.width) === lastWidth) return;
+  lastWidth = Math.round(e.contentRect.width);
   cancelAnimationFrame(raf);
-  raf = requestAnimationFrame(() => renderChart($('chart'), lastMonthly));
-}).observe($('chart'));
+  raf = requestAnimationFrame(() => drawCharts());
+}).observe($('results'));
 
+mountIcons();
 renderFixed();
 renderInputs();
 renderResults();
