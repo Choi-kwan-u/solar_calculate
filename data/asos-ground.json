@@ -1,0 +1,240 @@
+{
+ "meta": {
+  "source": "공공데이터포털 기상청_지상(종관, ASOS) 일자료 조회서비스",
+  "api": "https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList",
+  "field": "sumGsr (합계 일사량, MJ/m²/일) ÷ 3.6 → kWh/m²/일",
+  "period": "2001–2025",
+  "method": "연도별로 유효 일수 300일 이상인 해만 일평균을 내고, 그 해들의 평균. 유효 연수 10년 미만 지점은 평균 비율에서 뺌",
+  "compareTo": "data/psh.json (NASA POWER 2001–2025 기후값) — 지점이 속한 시군구 값",
+  "fetchedAt": "2026-10-21",
+  "stationsUsed": 22,
+  "meanRatioSiteOverGround": 1.009
+ },
+ "rows": [
+  {
+   "stn": 101,
+   "name": "춘천",
+   "region": "강원 춘천시",
+   "years": 25,
+   "ground": 3.736,
+   "site": 3.81,
+   "ratio": 1.02
+  },
+  {
+   "stn": 105,
+   "name": "강릉",
+   "region": "강원 강릉시",
+   "years": 25,
+   "ground": 3.795,
+   "site": 3.81,
+   "ratio": 1.004
+  },
+  {
+   "stn": 108,
+   "name": "서울",
+   "region": "서울 종로구",
+   "years": 25,
+   "ground": 3.576,
+   "site": 3.9,
+   "ratio": 1.091
+  },
+  {
+   "stn": 112,
+   "name": "인천",
+   "region": "인천 제물포구",
+   "years": 25,
+   "ground": 3.697,
+   "site": 3.9,
+   "ratio": 1.055
+  },
+  {
+   "stn": 114,
+   "name": "원주",
+   "region": "강원 원주시",
+   "years": 25,
+   "ground": 3.805,
+   "site": 3.81,
+   "ratio": 1.001
+  },
+  {
+   "stn": 119,
+   "name": "수원",
+   "region": "경기 수원시 권선구",
+   "years": 25,
+   "ground": 3.719,
+   "site": 3.9,
+   "ratio": 1.049
+  },
+  {
+   "stn": 129,
+   "name": "서산",
+   "region": "충남 서산시",
+   "years": 25,
+   "ground": 3.764,
+   "site": 3.9,
+   "ratio": 1.036
+  },
+  {
+   "stn": 131,
+   "name": "청주",
+   "region": "충북 청주시 흥덕구",
+   "years": 25,
+   "ground": 3.824,
+   "site": 3.87,
+   "ratio": 1.012
+  },
+  {
+   "stn": 133,
+   "name": "대전",
+   "region": "대전 유성구",
+   "years": 25,
+   "ground": 4.046,
+   "site": 3.87,
+   "ratio": 0.956
+  },
+  {
+   "stn": 135,
+   "name": "추풍령",
+   "region": "충북 영동군",
+   "years": 25,
+   "ground": 3.878,
+   "site": 3.87,
+   "ratio": 0.998
+  },
+  {
+   "stn": 136,
+   "name": "안동",
+   "region": "경북 안동시",
+   "years": 25,
+   "ground": 3.864,
+   "site": 3.96,
+   "ratio": 1.025
+  },
+  {
+   "stn": 138,
+   "name": "포항",
+   "region": "경북 포항시 북구",
+   "years": 24,
+   "ground": 3.845,
+   "site": 3.87,
+   "ratio": 1.007
+  },
+  {
+   "stn": 143,
+   "name": "대구",
+   "region": "대구 동구",
+   "years": 25,
+   "ground": 3.991,
+   "site": 4.02,
+   "ratio": 1.007
+  },
+  {
+   "stn": 146,
+   "name": "전주",
+   "region": "전북 전주시 덕진구",
+   "years": 25,
+   "ground": 3.837,
+   "site": 3.92,
+   "ratio": 1.022
+  },
+  {
+   "stn": 152,
+   "name": "울산",
+   "region": "울산 중구",
+   "years": 3,
+   "ground": 4.247,
+   "site": 3.9,
+   "ratio": 0.918
+  },
+  {
+   "stn": 155,
+   "name": "창원",
+   "region": "경남 창원시 성산구",
+   "years": 10,
+   "ground": 4.196,
+   "site": 4.02,
+   "ratio": 0.958
+  },
+  {
+   "stn": 156,
+   "name": "광주",
+   "region": "전남광주 북구",
+   "years": 25,
+   "ground": 4.014,
+   "site": 3.86,
+   "ratio": 0.962
+  },
+  {
+   "stn": 159,
+   "name": "부산",
+   "region": "부산 중구",
+   "years": 24,
+   "ground": 4.082,
+   "site": 3.9,
+   "ratio": 0.955
+  },
+  {
+   "stn": 165,
+   "name": "목포",
+   "region": "전남광주 목포시",
+   "years": 25,
+   "ground": 3.906,
+   "site": 3.91,
+   "ratio": 1.001
+  },
+  {
+   "stn": 168,
+   "name": "여수",
+   "region": "전남광주 여수시",
+   "years": 9,
+   "ground": 4.016,
+   "site": 4,
+   "ratio": 0.996
+  },
+  {
+   "stn": 177,
+   "name": "홍성",
+   "region": "충남 홍성군",
+   "years": 10,
+   "ground": 4.011,
+   "site": 3.9,
+   "ratio": 0.972
+  },
+  {
+   "stn": 184,
+   "name": "제주",
+   "region": "제주 제주시",
+   "years": 25,
+   "ground": 3.736,
+   "site": 3.81,
+   "ratio": 1.02
+  },
+  {
+   "stn": 185,
+   "name": "고산",
+   "region": "제주 제주시",
+   "years": 25,
+   "ground": 3.734,
+   "site": 3.81,
+   "ratio": 1.02
+  },
+  {
+   "stn": 189,
+   "name": "서귀포",
+   "region": "제주 서귀포시",
+   "years": 1,
+   "ground": 4.345,
+   "site": 3.81,
+   "ratio": 0.877
+  },
+  {
+   "stn": 192,
+   "name": "진주",
+   "region": "경남 진주시",
+   "years": 25,
+   "ground": 3.95,
+   "site": 4.02,
+   "ratio": 1.018
+  }
+ ]
+}

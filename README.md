@@ -41,6 +41,8 @@ tests/
 
 ## 데이터 다시 만들기
 
+공공데이터포털 키가 필요한 스크립트(`scripts/compare-asos.mjs`)는 저장소 루트의 `.env.local`(git 무시)에 `DATA_GO_KR_KEY=...`로 키를 넣고 돌린다. 키는 커밋하지 않는다.
+
 행정구역이 바뀌었을 때(분기마다 확인):
 
 ```bash
@@ -56,7 +58,8 @@ npm run data:psh
 
 - [docs/VISUAL.md](docs/VISUAL.md) — 디자인(해 질 녘 지평선). 색·글꼴·그래프는 이 문서가 기준.
 - [docs/DESIGN.md](docs/DESIGN.md) — 설계(v2.1). 3.1·3.2 검산표는 `tests/calc.test.js`가 그대로 검사하므로, 상수나 식을 바꾸면 표를 다시 뽑아 문서와 테스트를 같이 고친다.
-- [docs/VALIDATION.md](docs/VALIDATION.md) — NASA 일사량 vs 지상 실측. 같은 기간 평균 +4%, 서울 +16%. 보정은 ASOS 2001~2025 대조 후 결정.
+- [docs/VALIDATION.md](docs/VALIDATION.md) — NASA 일사량 vs 지상 실측. ASOS 22개 지점 2001~2025 평균 +1%, 서울 +9%.
+- [data/SOURCES.md](data/SOURCES.md) — 모든 데이터의 출처·받은 날짜·조회 조건. 데이터를 새로 받으면 여기부터 고친다.
 
 ## 배포
 
