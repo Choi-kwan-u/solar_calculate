@@ -13,5 +13,6 @@
 - 외부 요청 0: 폰트는 src/fonts에 자체 호스팅, 일사량은 빌드 때 data/psh.json으로 박는다. CDN·런타임 API 추가 금지.
 - 포인트 색(앰버)은 결과 숫자·슬라이더·차트 막대에만. UI 문구는 해요체, 돈은 '수익'이 아니라 '절감액'.
 
-## 저장소
-- 지금은 개인 계정 Choi-kwan-u에 둔다. 나중에 회사 org(github.com/speech-tools-kr)로 옮길 예정.
+## 저장소·배포
+- github.com/Choi-kwan-u/solar_calculate (개인 계정, 공개). 나중에 회사 org(github.com/speech-tools-kr)로 옮길 예정. 로컬 폴더 이름은 ckw4_solar.
+- main에 push하면 .github/workflows/pages.yml이 테스트 → 빌드 → GitHub Pages 배포. 주소 https://choi-kwan-u.github.io/solar_calculate/ (도메인은 사용자가 나중에 직접 붙임).
