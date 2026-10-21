@@ -1,39 +1,21 @@
 /* 디자인 기준: docs/VISUAL.md — 해 질 녘 지평선. 페이지 전체가 하늘이고 맨 아래가 지평선. */
 
 :root {
-  color-scheme: light;
-  --bg-top: #f8f4f6;
-  --bg-mid: #f8f4f6;
-  --bg-bottom: #f3e3e8;   /* 아주 옅은 노을 */
-  --surface: #ffffff;
-  --field: #ffffff;
-  --line: #e4dce2;
-  --text: #1f1d30;
-  --text-2: #5e5670;
-  --accent: #a8334d;      /* 결과 숫자, 해 마커 */
-  --muted: #8a5a73;       /* 범위 띠, 보조 그래프 — 글씨엔 안 쓴다 */
-  --seg-track: #f3edf1;
-  --invalid: #b3261e;
-  --on-horizon: var(--text-2); /* 노을 띠 위 글씨 */
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg-top: #16172b;    /* 밤 */
-    --bg-mid: #3b2f4e;    /* 해 질 녘 */
-    --bg-bottom: #b4405a; /* 지평선 노을 */
-    --surface: #222339;
-    --field: #1b1c30;
-    --line: #38364f;
-    --text: #f1eaf0;
-    --text-2: #b8aec4;
-    --accent: #f2757f;
-    --muted: #9a6c86;
-    --seg-track: #1b1c30;
-    --invalid: #f2b8b5;
-    --on-horizon: var(--text); /* 노을 위엔 본문색만(보조글 2.6:1, 코랄 2.0:1이라 금지) */
-  }
+  /* 밤하늘·노을 한 가지만 쓴다(사용자 결정 2026-10-21 — OS 라이트 모드에서도 같은 화면) */
+  color-scheme: dark;
+  --bg-top: #16172b;    /* 밤 */
+  --bg-mid: #3b2f4e;    /* 해 질 녘 */
+  --bg-bottom: #b4405a; /* 지평선 노을 */
+  --surface: #222339;
+  --field: #1b1c30;
+  --line: #38364f;
+  --text: #f1eaf0;
+  --text-2: #b8aec4;
+  --accent: #f2757f;    /* 결과 숫자, 해 마커 */
+  --muted: #9a6c86;     /* 범위 띠, 보조 그래프 — 글씨엔 안 쓴다 */
+  --seg-track: #1b1c30;
+  --invalid: #f2b8b5;
+  --on-horizon: var(--text); /* 노을 위엔 본문색만(보조글 2.6:1, 코랄 2.0:1이라 금지) */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -64,26 +46,24 @@ body::before {
   background: linear-gradient(180deg, var(--bg-top) 0, var(--bg-top) 30%, var(--bg-mid) calc(100% - 400px), var(--bg-bottom) 100%);
 }
 
-/* 밤하늘 별 — 다크 모드, 맨 위 구간에만. 정지, 불투명도 0.25 이하 */
-@media (prefers-color-scheme: dark) {
-  body::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 340px;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      radial-gradient(circle at 8% 22%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.6px),
-      radial-gradient(circle at 19% 61%, rgba(255, 255, 255, 0.16) 0 0.8px, transparent 1.4px),
-      radial-gradient(circle at 31% 12%, rgba(255, 255, 255, 0.2) 0 1px, transparent 1.6px),
-      radial-gradient(circle at 44% 38%, rgba(255, 255, 255, 0.14) 0 0.8px, transparent 1.4px),
-      radial-gradient(circle at 57% 9%, rgba(255, 255, 255, 0.24) 0 1.1px, transparent 1.7px),
-      radial-gradient(circle at 66% 48%, rgba(255, 255, 255, 0.15) 0 0.8px, transparent 1.4px),
-      radial-gradient(circle at 76% 20%, rgba(255, 255, 255, 0.2) 0 1px, transparent 1.6px),
-      radial-gradient(circle at 87% 57%, rgba(255, 255, 255, 0.13) 0 0.8px, transparent 1.4px),
-      radial-gradient(circle at 93% 14%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.6px),
-      radial-gradient(circle at 51% 72%, rgba(255, 255, 255, 0.12) 0 0.8px, transparent 1.4px);
-  }
+/* 밤하늘 별 — 맨 위 구간에만. 정지, 불투명도 0.25 이하 */
+body::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 340px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 22%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 19% 61%, rgba(255, 255, 255, 0.16) 0 0.8px, transparent 1.4px),
+    radial-gradient(circle at 31% 12%, rgba(255, 255, 255, 0.2) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 44% 38%, rgba(255, 255, 255, 0.14) 0 0.8px, transparent 1.4px),
+    radial-gradient(circle at 57% 9%, rgba(255, 255, 255, 0.24) 0 1.1px, transparent 1.7px),
+    radial-gradient(circle at 66% 48%, rgba(255, 255, 255, 0.15) 0 0.8px, transparent 1.4px),
+    radial-gradient(circle at 76% 20%, rgba(255, 255, 255, 0.2) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 87% 57%, rgba(255, 255, 255, 0.13) 0 0.8px, transparent 1.4px),
+    radial-gradient(circle at 93% 14%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 51% 72%, rgba(255, 255, 255, 0.12) 0 0.8px, transparent 1.4px);
 }
 
 /* 결과 숫자 — 좁은 숫자체. '원'·'만' 같은 한글은 SUIT로 넘어간다 */
