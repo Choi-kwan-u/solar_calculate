@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>태양광 손익분기 계산기</title>
+    <meta name="description" content="지역·패널 수·가격·월 전기요금만 넣으면 태양광 발전량과 전기요금 절감액, 손익분기 기간을 바로 계산합니다. 누진제·상계거래 반영, 계산 근거 전부 공개." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FAFAF7" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141414" />
+    <meta property="og:title" content="태양광 손익분기 계산기" />
+    <meta property="og:description" content="우리 집에 패널 몇 장 달면 몇 년 만에 본전일까? 발전량·절감액·손익분기를 바로 계산해요." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="head">
+        <h1>태양광 손익분기 계산기</h1>
+        <p class="lede">지역, 패널 수, 전기요금만 넣으면 발전량과 절감액, 본전 뽑는 데 걸리는 기간을 바로 계산해요.</p>
+      </header>
+
+      <section class="card inputs" aria-label="입력">
+        <div class="field">
+          <label class="label" for="region-input" id="region-label">위치</label>
+          <div class="combo" id="region-combo">
+            <input id="region-input" class="input" type="text" role="combobox" aria-autocomplete="list"
+              aria-expanded="false" aria-controls="region-list" autocomplete="off" autocorrect="off"
+              autocapitalize="off" spellcheck="false" placeholder="시·군·구 이름 (예: 안산, ㅇㅅ)" />
+            <ul id="region-list" class="combo-list" role="listbox" aria-labelledby="region-label" hidden></ul>
+          </div>
+          <button type="button" class="chip" id="region-chip" hidden>
+            <span><strong id="chip-name"></strong> · <span class="nowrap">연평균 <span id="chip-psh" class="tnum"></span> kWh/m²/일</span></span>
+            <span class="chip-action">변경</span>
+          </button>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label class="label" for="panel-count">패널 개수</label>
+            <span class="aside tnum" id="panel-kw"></span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="panel-range" step="1" aria-label="패널 개수" />
+            <span class="suffix-input count">
+              <input class="input" id="panel-count" type="number" inputmode="numeric" step="1" />
+              <span class="suffix">장</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="price">1장당 가격 <span class="opt">설치비 포함</span></label>
+          <span class="suffix-input">
+            <input class="input" id="price" type="text" inputmode="numeric" maxlength="11" autocomplete="off" />
+            <span class="suffix">원</span>
+          </span>
+          <p class="help tnum" id="price-total"></p>
+        </div>
+
+        <div class="field">
+          <label class="label" for="bill">월 전기요금 <span class="opt">선택 · 넣으면 훨씬 정확해요</span></label>
+          <span class="suffix-input">
+            <input class="input" id="bill" type="text" inputmode="numeric" maxlength="9" placeholder="예: 70,000"
+              autocomplete="off" />
+            <span class="suffix">원</span>
+          </span>
+          <p class="help tnum" id="bill-usage"></p>
+        </div>
+
+        <details class="more" id="more">
+          <summary><span>더 정확하게</span><span class="more-state" id="more-state"></span></summary>
+          <fieldset class="seg-field">
+            <legend>지붕 방향</legend>
+            <div class="seg" id="seg-orientation"></div>
+          </fieldset>
+          <fieldset class="seg-field">
+            <legend>그늘</legend>
+            <div class="seg" id="seg-shade"></div>
+          </fieldset>
+          <p class="help">모르면 '모름'으로 두세요. 중간값으로 계산하고 결과를 범위로 보여 드려요. 그늘 계수는 실측이 아닌 경험치예요.</p>
+        </details>
+      </section>
+
+      <section class="card results is-empty" id="results" aria-labelledby="results-title">
+        <h2 class="sr-only" id="results-title">결과</h2>
+        <p class="empty-msg">지역을 먼저 골라 주세요</p>
+        <table class="rtable">
+          <thead>
+            <tr><td></td><th scope="col">발전량</th><th scope="col">절감액</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">하루</th><td id="r-day-kwh"></td><td id="r-day-won"></td></tr>
+            <tr><th scope="row">한 달</th><td id="r-month-kwh"></td><td id="r-month-won"></td></tr>
+            <tr><th scope="row">1년</th><td id="r-year-kwh"></td><td id="r-year-won"></td></tr>
+          </tbody>
+        </table>
+        <div class="be">
+          <p class="be-label">손익분기</p>
+          <p class="be-main" id="r-be"></p>
+          <p class="be-sub tnum" id="r-be-sub"></p>
+        </div>
+        <div class="hints">
+          <button type="button" class="hint" id="hint-bill" hidden>전기요금을 넣으면 더 정확해요</button>
+          <button type="button" class="hint" id="hint-more" hidden>방향·그늘을 고르면 범위가 좁아져요</button>
+          <p class="hint-note" id="hint-life" hidden></p>
+        </div>
+        <p class="sr-only" aria-live="polite" id="live"></p>
+      </section>
+
+      <section class="card warn" id="surplus" hidden>
+        <svg class="warn-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M12 3 2 20h20L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+          <path d="M12 10v4.5M12 17.2v.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <div>
+          <p id="surplus-text"></p>
+          <button type="button" class="hint" id="surplus-fix" hidden></button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="chart-title">
+        <div class="card-head">
+          <h2 id="chart-title">월별 발전량</h2>
+          <span class="aside">kWh · 중앙값</span>
+        </div>
+        <div class="chart" id="chart"></div>
+      </section>
+
+      <details class="card why" id="why">
+        <summary>계산 근거 보기</summary>
+        <div class="why-body">
+          <h3>바꿀 수 있는 값</h3>
+          <div class="kv">
+            <label for="adv-watt">패널 1장 정격</label>
+            <div class="inline">
+              <input class="input w-num" id="adv-watt" type="text" inputmode="numeric" /><span class="unit-out">W</span>
+            </div>
+
+            <label for="adv-pr">성능비(PR)</label>
+            <div class="inline">
+              <input class="input w-num" id="adv-pr" type="text" inputmode="decimal" />
+              <span class="help tnum" id="adv-pr-range"></span>
+            </div>
+
+            <label for="adv-unit">전기 단가</label>
+            <div>
+              <div class="inline">
+                <input class="input w-num" id="adv-unit" type="text" inputmode="numeric" /><span class="unit-out">원/kWh</span>
+              </div>
+              <p class="help" id="adv-unit-note"></p>
+            </div>
+
+            <label for="adv-usage">월평균 사용량</label>
+            <div>
+              <div class="inline">
+                <input class="input w-num" id="adv-usage" type="text" inputmode="numeric" placeholder="선택" /><span class="unit-out">kWh</span>
+              </div>
+              <p class="help">요금 대신 kWh를 알면 여기에. 넣으면 전기요금보다 우선해요.</p>
+            </div>
+
+            <label for="adv-subsidy-on">보조금 적용</label>
+            <div>
+              <div class="inline">
+                <input type="checkbox" id="adv-subsidy-on" />
+                <span>kW당</span>
+                <input class="input w-money" id="adv-subsidy" type="text" inputmode="numeric" aria-label="kW당 보조금" /><span class="unit-out">원</span>
+              </div>
+              <p class="help" id="adv-subsidy-note"></p>
+            </div>
+          </div>
+
+          <h3>고정 값</h3>
+          <dl class="kv">
+            <dt>지붕 방향 계수</dt>
+            <dd><span id="fixed-orientation" class="tnum"></span><span class="help block">수평면 일사량 대비. pvlib 서울 1년 시간별 시뮬레이션 기준</span></dd>
+            <dt>그늘 계수</dt>
+            <dd><span id="fixed-shade" class="tnum"></span><span class="help block">실측 근거가 약한 경험치. '모름'은 통계 평균이 아니라 중간값</span></dd>
+            <dt>일사량 출처</dt>
+            <dd id="fixed-psh"></dd>
+            <dt>요금표 기준</dt>
+            <dd id="fixed-tariff" class="tnum"></dd>
+            <dt>지역 좌표</dt>
+            <dd id="fixed-regions"></dd>
+          </dl>
+
+          <h3>지금 숫자가 나온 과정 <span class="opt">중앙값 기준</span></h3>
+          <ol class="steps" id="steps"></ol>
+
+          <button type="button" class="btn" id="reset">바꾼 값 기본값으로 되돌리기</button>
+        </div>
+      </details>
+
+      <footer class="foot">
+        <p class="foot-lead">주변 건물 그늘은 반영하지 않은 추정치예요. 정확한 값은 현장 실사가 필요해요.</p>
+        <p>패널 열화(연 0.5%)·인버터 교체비·전기요금 인상은 빼고 계산해서 실제 회수는 조금 더 걸릴 수 있어요.
+          10kW 이하 주택용은 상계거래라 남는 전기를 현금으로 받지 못해요.
+          전기요금 역산은 비여름철 요금표 기준이고, 그 사용량을 12개월 똑같이 적용해요.</p>
+        <p>일사량 <a href="https://power.larc.nasa.gov/" rel="noopener">NASA POWER</a> ·
+          요금 <a href="https://cyber.kepco.co.kr/" rel="noopener">한전 사이버지점</a> ·
+          지역 경계 <a href="https://github.com/vuski/admdongkor" rel="noopener">vuski/admdongkor</a></p>
+      </footer>
+    </main>
+  </body>
+</html>
