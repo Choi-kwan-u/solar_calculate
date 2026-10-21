@@ -276,6 +276,7 @@ function renderSteps(r, c) {
   const irradiance = state.region.monthly.reduce((s, v, i) => s + v * DAYS[i], 0); // kWh/m²·년
   const steps = [
     ['설비 용량', `${state.panelCount}장 × ${int(state.panelWatt)}W = ${f2(m.capacityKw)} kW`],
+    ['일사량', `${state.region.name} 연평균 ${state.region.annual.toFixed(2)} kWh/m²/일 = NASA ${state.region.nasa.annual.toFixed(2)} × 실측 보정 ${state.region.correction.factor.toFixed(3)} (${state.region.correction.stations.join('·')} 관측소)`],
     ['연 발전량', `${f2(m.capacityKw)} kW × 연 일사량 ${int(irradiance)} kWh/m² × 방향 ${f2(m.orientation)} × 그늘 ${f2(m.shade)} × 성능비 ${f2(m.pr)} = ${int(m.yearlyKwh)} kWh`],
   ];
   if (state.monthlyUsage > 0) steps.push(['사용량', `직접 넣은 월 ${int(m.usage)} kWh`]);
@@ -314,7 +315,7 @@ function renderFixed() {
   $('fixed-orientation').textContent = list(ORIENTATION, ['south', 'flat', 'eastWest', 'north', 'unknown'], 'label');
   $('fixed-shade').textContent = list(SHADE, ['none', 'some', 'heavy', 'unknown'], 'short');
   const { meta } = data;
-  $('fixed-psh').textContent = `${meta.source} ${meta.period} 기후값 · ${meta.surface} 기준. 위성 자료(${meta.dataset})라 격자가 약 1°(100km) — 전국 ${meta.regions.count}개 시군구가 ${meta.distinctCells}개 값으로 나뉘어요.`;
+  $('fixed-psh').textContent = `${meta.source} ${meta.period} 기후값 · ${meta.surface} 기준. 위성 자료(${meta.dataset})라 격자가 약 1°(100km)예요. 보정 계수 ${meta.correction.factorRange.join('~')}.`;
   const pct = (x) => `${+(x * 100).toFixed(1)}%`;
   $('fixed-tariff').textContent = `한전 주택용 저압 ${TARIFF.updated} · 누진 ${TARIFF.rates.map((x) => x.toFixed(1)).join(' / ')}원/kWh`
     + ` · 기후환경·연료비조정 +${TARIFF.extraPerKwh}원/kWh · 부가세 ${pct(TARIFF.vat)} + 전력기금 ${pct(TARIFF.fund)}`;

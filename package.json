@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "node --test tests/*.test.js",
     "data:regions": "node scripts/build-regions.mjs",
-    "data:psh": "node scripts/build-psh.mjs"
+    "data:psh": "node scripts/build-psh.mjs",
+    "data:asos": "node scripts/compare-asos.mjs",
+    "data:correct": "node scripts/correct-psh.mjs"
   },
   "devDependencies": {
     "vite": "^8.3.4"

@@ -8,6 +8,7 @@
 |---|---|---|---|---|
 | `data/psh.json` 일사량 | NASA POWER Climatology API `https://power.larc.nasa.gov/api/temporal/climatology/point` | 2026-10-21 | API v2.10.1, `parameters=ALLSKY_SFC_SW_DWN`, `community=RE`(kWh/m²/일), 출처 데이터 CERES SYN1deg(1°), 기간 2001-01~2025-12(응답 header.range), 시군구 대표 좌표 256개 | `scripts/build-psh.mjs` (meta에 기간·버전·생성일) |
 | `data/regions.json` 시군구 대표 좌표 | vuski/admdongkor 행정동 경계 `https://raw.githubusercontent.com/vuski/admdongkor/master/ver20261001/HangJeongDong_ver20261001.geojson` | 2026-10-21 | ver20261001(2026-10-01 행정구역, 3,559개 행정동 → 256개 시군구), 34.6MB. 원본 GeoJSON은 저장소에 넣지 않음 | `scripts/build-regions.mjs` (meta에 파일명·기준일) |
+| `data/psh.json` 보정(annual·monthly) | 위 NASA 값 × 기상청 ASOS 실측 비율(아래 `data/asos-ground.json`) | 2026-10-21 적용 | 가까운 3개 지점(유효 10년 이상 22곳) 실측÷NASA 비율의 거리 역제곱 가중, 계수 0.917~1.047. 보정 전 값은 각 항목 `nasa`, 방법은 meta.correction | `scripts/correct-psh.mjs` |
 | 요금·세금·보조금 상수 `src/constants.js` | 아래 "상수 근거" | 2026-10-21 확인 | — | 손으로 입력 |
 
 ## 검증에 쓴 데이터

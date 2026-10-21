@@ -23,6 +23,14 @@ test('연평균 = 월별 값의 일수 가중 평균', () => {
   }
 });
 
+test('보정: 원본 NASA 값을 남기고, 계수는 0.85~1.15 안', () => {
+  for (const [name, r] of list) {
+    assert.equal(r.nasa.monthly.length, 12, name);
+    assert.ok(r.correction.factor > 0.85 && r.correction.factor < 1.15, `${name}: ${r.correction.factor}`);
+    assert.ok(Math.abs(r.annual - r.nasa.annual * r.correction.factor) < 0.011, name);
+  }
+});
+
 test('meta에 출처·기간·단위', () => {
   assert.equal(meta.source, 'NASA POWER');
   assert.match(meta.period, /^\d{4}–\d{4}$/);

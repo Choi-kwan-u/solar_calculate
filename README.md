@@ -50,6 +50,9 @@ tests/
 npm run data:regions -- /경로/HangJeongDong_verYYYYMMDD.geojson
 # 2) 일사량 — 좌표가 그대로인 곳은 scripts/.cache/ 응답을 재사용
 npm run data:psh
+# 3) 기상청 ASOS 실측 대조(.env.local 키 필요) → 4) 실측 비율로 보정. psh를 새로 받으면 3·4를 꼭 다시 돌린다
+npm run data:asos
+npm run data:correct
 ```
 
 모르는 시도 이름이 나오면 `build-regions.mjs`가 멈추고 `SIDO_SHORT`에 약칭을 넣으라고 알려 준다. 요금이 바뀌면 `src/constants.js`의 `TARIFF`만 고치면 된다.
@@ -58,7 +61,7 @@ npm run data:psh
 
 - [docs/VISUAL.md](docs/VISUAL.md) — 디자인(해 질 녘 지평선). 색·글꼴·그래프는 이 문서가 기준.
 - [docs/DESIGN.md](docs/DESIGN.md) — 설계(v2.1). 3.1·3.2 검산표는 `tests/calc.test.js`가 그대로 검사하므로, 상수나 식을 바꾸면 표를 다시 뽑아 문서와 테스트를 같이 고친다.
-- [docs/VALIDATION.md](docs/VALIDATION.md) — NASA 일사량 vs 지상 실측. ASOS 22개 지점 2001~2025 평균 +1%, 서울 +9%.
+- [docs/VALIDATION.md](docs/VALIDATION.md) — NASA 일사량 vs 지상 실측(ASOS 22개 지점 2001~2025)과 그 비율로 한 보정.
 - [data/SOURCES.md](data/SOURCES.md) — 모든 데이터의 출처·받은 날짜·조회 조건. 데이터를 새로 받으면 여기부터 고친다.
 
 ## 배포

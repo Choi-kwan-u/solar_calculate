@@ -92,12 +92,15 @@ const rows = STATIONS.map(([stn, name, region]) => {
     if (valid.length >= MIN_DAYS) years.push(valid.reduce((s, d) => s + d.gsr, 0) / valid.length / 3.6);
   });
   const ground = years.length ? years.reduce((a, b) => a + b, 0) / years.length : null;
-  const site = regions[region].annual;
-  return { stn, name, region, years: years.length, ground: ground && +ground.toFixed(3), site, ratio: ground && +(site / ground).toFixed(3) };
+  const site = regions[region].annual;                    // 사이트가 보여 주는 값(보정 후)
+  const nasa = regions[region].nasa?.annual ?? site;      // 보정 전 NASA 값
+  const r3 = (x) => ground && +(x / ground).toFixed(3);
+  return { stn, name, region, years: years.length, ground: ground && +ground.toFixed(3), nasa, site, ratioNasa: r3(nasa), ratio: r3(site) };
 });
 
 const ok = rows.filter((r) => r.years >= 10);
 const meanRatio = ok.reduce((s, r) => s + r.ratio, 0) / ok.length;
+const meanRatioNasa = ok.reduce((s, r) => s + r.ratioNasa, 0) / ok.length;
 const out = {
   meta: {
     source: '공공데이터포털 기상청_지상(종관, ASOS) 일자료 조회서비스',
@@ -105,9 +108,10 @@ const out = {
     field: 'sumGsr (합계 일사량, MJ/m²/일) ÷ 3.6 → kWh/m²/일',
     period: `${YEARS[0]}–${YEARS[1]}`,
     method: `연도별로 유효 일수 ${MIN_DAYS}일 이상인 해만 일평균을 내고, 그 해들의 평균. 유효 연수 10년 미만 지점은 평균 비율에서 뺌`,
-    compareTo: `data/psh.json (${pshMeta.source} ${pshMeta.period} 기후값) — 지점이 속한 시군구 값`,
+    compareTo: `data/psh.json (${pshMeta.source} ${pshMeta.period} 기후값) — 지점이 속한 시군구 값. nasa=보정 전, site=사이트 값(보정 후)`,
     fetchedAt: new Date().toISOString().slice(0, 10),
     stationsUsed: ok.length,
+    meanRatioNasaOverGround: +meanRatioNasa.toFixed(3),
     meanRatioSiteOverGround: +meanRatio.toFixed(3),
   },
   rows,
@@ -116,6 +120,6 @@ writeFileSync(OUT, JSON.stringify(out, null, 1) + '\n');
 
 const pct = (r) => (r == null ? '  —' : `${r >= 1 ? '+' : ''}${((r - 1) * 100).toFixed(0)}%`);
 for (const r of rows) {
-  console.log(`${r.name.padEnd(4, '　')} ${String(r.years).padStart(2)}년  지상 ${r.ground?.toFixed(2) ?? ' —  '}  사이트 ${r.site.toFixed(2)}  ${pct(r.ratio)}`);
+  console.log(`${r.name.padEnd(4, '　')} ${String(r.years).padStart(2)}년  지상 ${r.ground?.toFixed(2) ?? ' —  '}  NASA ${r.nasa.toFixed(2)} ${pct(r.ratioNasa)}  사이트 ${r.site.toFixed(2)} ${pct(r.ratio)}`);
 }
-console.log(`평균: 사이트 값이 지상 실측보다 ${pct(meanRatio)} (${ok.length}개 지점, ${YEARS[0]}–${YEARS[1]})`);
+console.log(`평균: NASA ${pct(meanRatioNasa)} · 사이트 ${pct(meanRatio)} (지상 실측 대비, ${ok.length}개 지점, ${YEARS[0]}–${YEARS[1]})`);

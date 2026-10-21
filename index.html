@@ -33,7 +33,7 @@
             <span><strong id="chip-name"></strong> · <span class="nowrap">연평균 <span id="chip-psh" class="tnum"></span> kWh/m²/일</span></span>
             <span class="chip-action">변경</span>
           </button>
-          <p class="help" id="region-note" hidden>일사량은 위성 자료의 약 100km 격자 평균이라 가까운 시군구끼리는 값이 같아요.</p>
+          <p class="help" id="region-note" hidden>일사량은 위성 자료(약 100km 격자)를 가까운 기상청 관측소 실측에 맞춰 보정한 값이에요.</p>
         </div>
 
         <div class="field">
@@ -180,7 +180,7 @@
             <dt>그늘 계수</dt>
             <dd><span id="fixed-shade" class="tnum"></span><span class="help block">실측 근거가 약한 경험치. '모름'은 통계 평균이 아니라 중간값</span></dd>
             <dt>일사량 출처</dt>
-            <dd><span id="fixed-psh"></span><span class="help block">기상청 ASOS 22개 지점 실측과 같은 기간(2001~2025년)끼리 비교하면 평균 1% 높아요. 수도권은 조금 더 높고(서울 9%), 남해안은 조금 낮아요(부산 −5%).</span></dd>
+            <dd><span id="fixed-psh"></span><span class="help block">위성 값은 수도권에서 높고(서울 +9%) 남해안에서 낮아서(부산 −5%), 기상청 ASOS 22개 지점의 2001~2025년 실측 비율로 시군구마다 보정했어요(가까운 3곳 거리 가중).</span></dd>
             <dt>요금표 기준</dt>
             <dd id="fixed-tariff" class="tnum"></dd>
             <dt>지역 좌표</dt>

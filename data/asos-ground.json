@@ -5,10 +5,11 @@
   "field": "sumGsr (합계 일사량, MJ/m²/일) ÷ 3.6 → kWh/m²/일",
   "period": "2001–2025",
   "method": "연도별로 유효 일수 300일 이상인 해만 일평균을 내고, 그 해들의 평균. 유효 연수 10년 미만 지점은 평균 비율에서 뺌",
-  "compareTo": "data/psh.json (NASA POWER 2001–2025 기후값) — 지점이 속한 시군구 값",
+  "compareTo": "data/psh.json (NASA POWER 2001–2025 기후값) — 지점이 속한 시군구 값. nasa=보정 전, site=사이트 값(보정 후)",
   "fetchedAt": "2026-10-21",
   "stationsUsed": 22,
-  "meanRatioSiteOverGround": 1.009
+  "meanRatioNasaOverGround": 1.009,
+  "meanRatioSiteOverGround": 1
  },
  "rows": [
   {
@@ -17,8 +18,10 @@
    "region": "강원 춘천시",
    "years": 25,
    "ground": 3.736,
-   "site": 3.81,
-   "ratio": 1.02
+   "nasa": 3.81,
+   "site": 3.74,
+   "ratioNasa": 1.02,
+   "ratio": 1.001
   },
   {
    "stn": 105,
@@ -26,8 +29,10 @@
    "region": "강원 강릉시",
    "years": 25,
    "ground": 3.795,
-   "site": 3.81,
-   "ratio": 1.004
+   "nasa": 3.81,
+   "site": 3.8,
+   "ratioNasa": 1.004,
+   "ratio": 1.001
   },
   {
    "stn": 108,
@@ -35,8 +40,10 @@
    "region": "서울 종로구",
    "years": 25,
    "ground": 3.576,
-   "site": 3.9,
-   "ratio": 1.091
+   "nasa": 3.9,
+   "site": 3.58,
+   "ratioNasa": 1.091,
+   "ratio": 1.001
   },
   {
    "stn": 112,
@@ -44,8 +51,10 @@
    "region": "인천 제물포구",
    "years": 25,
    "ground": 3.697,
-   "site": 3.9,
-   "ratio": 1.055
+   "nasa": 3.9,
+   "site": 3.7,
+   "ratioNasa": 1.055,
+   "ratio": 1.001
   },
   {
    "stn": 114,
@@ -53,7 +62,9 @@
    "region": "강원 원주시",
    "years": 25,
    "ground": 3.805,
+   "nasa": 3.81,
    "site": 3.81,
+   "ratioNasa": 1.001,
    "ratio": 1.001
   },
   {
@@ -62,8 +73,10 @@
    "region": "경기 수원시 권선구",
    "years": 25,
    "ground": 3.719,
-   "site": 3.9,
-   "ratio": 1.049
+   "nasa": 3.9,
+   "site": 3.72,
+   "ratioNasa": 1.049,
+   "ratio": 1
   },
   {
    "stn": 129,
@@ -71,8 +84,10 @@
    "region": "충남 서산시",
    "years": 25,
    "ground": 3.764,
-   "site": 3.9,
-   "ratio": 1.036
+   "nasa": 3.9,
+   "site": 3.76,
+   "ratioNasa": 1.036,
+   "ratio": 0.999
   },
   {
    "stn": 131,
@@ -80,8 +95,10 @@
    "region": "충북 청주시 흥덕구",
    "years": 25,
    "ground": 3.824,
-   "site": 3.87,
-   "ratio": 1.012
+   "nasa": 3.87,
+   "site": 3.82,
+   "ratioNasa": 1.012,
+   "ratio": 0.999
   },
   {
    "stn": 133,
@@ -89,8 +106,10 @@
    "region": "대전 유성구",
    "years": 25,
    "ground": 4.046,
-   "site": 3.87,
-   "ratio": 0.956
+   "nasa": 3.87,
+   "site": 4.05,
+   "ratioNasa": 0.956,
+   "ratio": 1.001
   },
   {
    "stn": 135,
@@ -98,8 +117,10 @@
    "region": "충북 영동군",
    "years": 25,
    "ground": 3.878,
-   "site": 3.87,
-   "ratio": 0.998
+   "nasa": 3.87,
+   "site": 3.88,
+   "ratioNasa": 0.998,
+   "ratio": 1
   },
   {
    "stn": 136,
@@ -107,8 +128,10 @@
    "region": "경북 안동시",
    "years": 25,
    "ground": 3.864,
-   "site": 3.96,
-   "ratio": 1.025
+   "nasa": 3.96,
+   "site": 3.86,
+   "ratioNasa": 1.025,
+   "ratio": 0.999
   },
   {
    "stn": 138,
@@ -116,8 +139,10 @@
    "region": "경북 포항시 북구",
    "years": 24,
    "ground": 3.845,
-   "site": 3.87,
-   "ratio": 1.007
+   "nasa": 3.87,
+   "site": 3.85,
+   "ratioNasa": 1.007,
+   "ratio": 1.001
   },
   {
    "stn": 143,
@@ -125,8 +150,10 @@
    "region": "대구 동구",
    "years": 25,
    "ground": 3.991,
-   "site": 4.02,
-   "ratio": 1.007
+   "nasa": 4.02,
+   "site": 3.99,
+   "ratioNasa": 1.007,
+   "ratio": 1
   },
   {
    "stn": 146,
@@ -134,8 +161,10 @@
    "region": "전북 전주시 덕진구",
    "years": 25,
    "ground": 3.837,
-   "site": 3.92,
-   "ratio": 1.022
+   "nasa": 3.92,
+   "site": 3.84,
+   "ratioNasa": 1.022,
+   "ratio": 1.001
   },
   {
    "stn": 152,
@@ -143,8 +172,10 @@
    "region": "울산 중구",
    "years": 3,
    "ground": 4.247,
-   "site": 3.9,
-   "ratio": 0.918
+   "nasa": 3.9,
+   "site": 3.96,
+   "ratioNasa": 0.918,
+   "ratio": 0.932
   },
   {
    "stn": 155,
@@ -152,8 +183,10 @@
    "region": "경남 창원시 성산구",
    "years": 10,
    "ground": 4.196,
-   "site": 4.02,
-   "ratio": 0.958
+   "nasa": 4.02,
+   "site": 4.2,
+   "ratioNasa": 0.958,
+   "ratio": 1.001
   },
   {
    "stn": 156,
@@ -161,8 +194,10 @@
    "region": "전남광주 북구",
    "years": 25,
    "ground": 4.014,
-   "site": 3.86,
-   "ratio": 0.962
+   "nasa": 3.86,
+   "site": 4.01,
+   "ratioNasa": 0.962,
+   "ratio": 0.999
   },
   {
    "stn": 159,
@@ -170,8 +205,10 @@
    "region": "부산 중구",
    "years": 24,
    "ground": 4.082,
-   "site": 3.9,
-   "ratio": 0.955
+   "nasa": 3.9,
+   "site": 4.08,
+   "ratioNasa": 0.955,
+   "ratio": 1
   },
   {
    "stn": 165,
@@ -179,7 +216,9 @@
    "region": "전남광주 목포시",
    "years": 25,
    "ground": 3.906,
+   "nasa": 3.91,
    "site": 3.91,
+   "ratioNasa": 1.001,
    "ratio": 1.001
   },
   {
@@ -188,8 +227,10 @@
    "region": "전남광주 여수시",
    "years": 9,
    "ground": 4.016,
-   "site": 4,
-   "ratio": 0.996
+   "nasa": 4,
+   "site": 4.05,
+   "ratioNasa": 0.996,
+   "ratio": 1.009
   },
   {
    "stn": 177,
@@ -197,8 +238,10 @@
    "region": "충남 홍성군",
    "years": 10,
    "ground": 4.011,
-   "site": 3.9,
-   "ratio": 0.972
+   "nasa": 3.9,
+   "site": 4.01,
+   "ratioNasa": 0.972,
+   "ratio": 1
   },
   {
    "stn": 184,
@@ -206,8 +249,10 @@
    "region": "제주 제주시",
    "years": 25,
    "ground": 3.736,
-   "site": 3.81,
-   "ratio": 1.02
+   "nasa": 3.81,
+   "site": 3.74,
+   "ratioNasa": 1.02,
+   "ratio": 1.001
   },
   {
    "stn": 185,
@@ -215,8 +260,10 @@
    "region": "제주 제주시",
    "years": 25,
    "ground": 3.734,
-   "site": 3.81,
-   "ratio": 1.02
+   "nasa": 3.81,
+   "site": 3.74,
+   "ratioNasa": 1.02,
+   "ratio": 1.002
   },
   {
    "stn": 189,
@@ -224,8 +271,10 @@
    "region": "제주 서귀포시",
    "years": 1,
    "ground": 4.345,
-   "site": 3.81,
-   "ratio": 0.877
+   "nasa": 3.81,
+   "site": 3.74,
+   "ratioNasa": 0.877,
+   "ratio": 0.861
   },
   {
    "stn": 192,
@@ -233,8 +282,10 @@
    "region": "경남 진주시",
    "years": 25,
    "ground": 3.95,
-   "site": 4.02,
-   "ratio": 1.018
+   "nasa": 4.02,
+   "site": 3.95,
+   "ratioNasa": 1.018,
+   "ratio": 1
   }
  ]
 }
