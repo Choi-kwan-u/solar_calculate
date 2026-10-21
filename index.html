@@ -33,6 +33,7 @@
             <span><strong id="chip-name"></strong> · <span class="nowrap">연평균 <span id="chip-psh" class="tnum"></span> kWh/m²/일</span></span>
             <span class="chip-action">변경</span>
           </button>
+          <p class="help" id="region-note" hidden>일사량은 위성 자료의 약 100km 격자 평균이라 가까운 시군구끼리는 값이 같아요.</p>
         </div>
 
         <div class="field">
@@ -163,8 +164,8 @@
             <div>
               <div class="inline">
                 <input type="checkbox" id="adv-subsidy-on" />
-                <span>kW당</span>
-                <input class="input w-money" id="adv-subsidy" type="text" inputmode="numeric" aria-label="kW당 보조금" /><span class="unit-out">원</span>
+                <span>총</span>
+                <input class="input w-money" id="adv-subsidy" type="text" inputmode="numeric" aria-label="총 보조금" /><span class="unit-out">원</span>
               </div>
               <p class="help" id="adv-subsidy-note"></p>
             </div>
@@ -177,7 +178,7 @@
             <dt>그늘 계수</dt>
             <dd><span id="fixed-shade" class="tnum"></span><span class="help block">실측 근거가 약한 경험치. '모름'은 통계 평균이 아니라 중간값</span></dd>
             <dt>일사량 출처</dt>
-            <dd id="fixed-psh"></dd>
+            <dd><span id="fixed-psh"></span><span class="help block">지상 실측(한국에너지기술연구원, 16개 지점)과 같은 기간(2000~2008년)끼리 비교하면 평균 4% 높고, 서울은 16% 높아요.</span></dd>
             <dt>요금표 기준</dt>
             <dd id="fixed-tariff" class="tnum"></dd>
             <dt>지역 좌표</dt>

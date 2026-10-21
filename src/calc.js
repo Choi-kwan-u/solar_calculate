@@ -60,6 +60,18 @@ function offsetYear(usage, monthlyKwh, t) {
   return { yearlyWon: won, usedKwh, surplusKwh: bank - bankAfterYear1 }; // 매년 쌓이기만 하는 양
 }
 
+/** 국비 추정(원): 가구당 subsidyMaxKw까지 kW당 subsidyPerKw */
+export function subsidyEstimate(panelCount, c = DEFAULTS) {
+  return Math.min((panelCount * c.panelWatt) / 1000, c.subsidyMaxKw ?? Infinity) * c.subsidyPerKw;
+}
+
+/** 보조금(원): 직접 넣은 총액(국비+지방비), 없으면 국비 추정. 설치비를 넘지 않는다 */
+export function subsidyOf(input, c = DEFAULTS) {
+  if (!input.useSubsidy) return 0;
+  const total = input.subsidyTotal ?? subsidyEstimate(input.panelCount, c);
+  return Math.min(total, input.panelCount * input.pricePerPanel);
+}
+
 function scenario(input, psh, k /* 0=낮음 1=중앙 2=높음 */, c) {
   const t = c.tariff ?? TARIFF;
   const orientation = ORIENTATION[input.orientation ?? 'unknown'].v[k];
@@ -76,8 +88,7 @@ function scenario(input, psh, k /* 0=낮음 1=중앙 2=높음 */, c) {
     : { yearlyWon: yearlyKwh * c.unitPrice, usedKwh: yearlyKwh, surplusKwh: 0 };
 
   const grossCost = input.panelCount * input.pricePerPanel;
-  const subsidyKw = Math.min(capacityKw, c.subsidyMaxKw ?? Infinity);
-  const subsidy = input.useSubsidy ? Math.min(subsidyKw * c.subsidyPerKw, grossCost) : 0;
+  const subsidy = subsidyOf(input, c);
   const totalCost = grossCost - subsidy;
   const dailyWon = yearlyWon / 365;
   return {
@@ -86,13 +97,18 @@ function scenario(input, psh, k /* 0=낮음 1=중앙 2=높음 */, c) {
     dailyKwh: yearlyKwh / 365, monthlyAvgKwh: yearlyKwh / 12, yearlyKwh,
     dailyWon, monthlyWon: yearlyWon / 12, yearlyWon,
     usedKwh, surplusKwh,
-    grossCost, subsidyKw, subsidy, totalCost,
+    grossCost, subsidy, totalCost,
     breakEvenDays: totalCost === 0 ? 0 : dailyWon > 0 ? totalCost / dailyWon : Infinity,
     lifetimeSaving: yearlyWon * c.panelLifeYears - totalCost,
   };
 }
 
-/** 낮음/중앙/높음 세 시나리오. 손익분기 범위는 [많이 아끼는 쪽, 적게 아끼는 쪽] */
+/**
+ * 낮음/중앙/높음 세 시나리오. 손익분기 범위는 [많이 아끼는 쪽, 적게 아끼는 쪽]
+ * @param input { panelCount, pricePerPanel, monthlyBill?, monthlyUsage?, orientation?, shade?, useSubsidy?, subsidyTotal? }
+ * @param psh   { monthly: number[12] }  kWh/m²/일 (= peak sun hours)
+ * @param c     DEFAULTS와 같은 모양 — 화면에서 바꾼 값이 들어온다
+ */
 export function calculate(input, psh, c = DEFAULTS) {
   const [low, mid, high] = [0, 1, 2].map((k) => scenario(input, psh, k, c));
   return { low, mid, high, breakEvenRange: [high.breakEvenDays, low.breakEvenDays] };

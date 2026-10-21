@@ -3,7 +3,7 @@
 import './fonts/pretendard/pretendardvariable-dynamic-subset.css';
 import './style.css';
 import data from '../data/psh.json';
-import { calculate, maxUsefulPanels, usageFromBill, DAYS } from './calc.js';
+import { calculate, maxUsefulPanels, subsidyEstimate, subsidyOf, usageFromBill, DAYS } from './calc.js';
 import { DEFAULTS, ORIENTATION, PANELS, SHADE, TARIFF } from './constants.js';
 import { buildIndex, mountSearch } from './search.js';
 import { renderChart } from './chart.js';
@@ -21,7 +21,7 @@ const ADVANCED = {
   unitPrice: DEFAULTS.unitPrice,
   monthlyUsage: null,
   useSubsidy: false,
-  subsidyPerKw: DEFAULTS.subsidyPerKw,
+  subsidyTotal: null, // 국비+지방비 총액. null이면 국비 추정
 };
 
 const state = {
@@ -42,13 +42,13 @@ const calcInput = () => ({
   orientation: state.orientation,
   shade: state.shade,
   useSubsidy: state.useSubsidy,
+  subsidyTotal: state.subsidyTotal,
 });
 
 const calcConsts = () => ({
   ...DEFAULTS,
   panelWatt: state.panelWatt,
   unitPrice: state.unitPrice,
-  subsidyPerKw: state.subsidyPerKw,
   pr: [round3(state.prMid - PR_SPREAD), state.prMid, round3(Math.min(1, state.prMid + PR_SPREAD))],
 });
 
@@ -140,8 +140,12 @@ function renderInputs() {
   range.value = state.panelCount;
   range.style.setProperty('--fill', `${((state.panelCount - PANELS.min) / (PANELS.max - PANELS.min)) * 100}%`);
   if (document.activeElement !== $('panel-count')) $('panel-count').value = state.panelCount;
-  $('panel-kw').textContent = `≈ ${((state.panelCount * state.panelWatt) / 1000).toFixed(2)} kW`;
-  $('price-total').textContent = `= ${won(state.panelCount * state.pricePerPanel)}`;
+  const c = calcConsts();
+  const kw = (state.panelCount * state.panelWatt) / 1000;
+  $('panel-kw').textContent = `≈ ${kw.toFixed(2)} kW`;
+  const gross = state.panelCount * state.pricePerPanel;
+  const subsidy = subsidyOf(calcInput(), c);
+  $('price-total').textContent = subsidy > 0 ? `= ${won(gross)} · 보조금 빼면 자부담 ${won(gross - subsidy)}` : `= ${won(gross)}`;
 
   const usage = usageFromBill(state.monthlyBill);
   $('bill-usage').textContent = state.monthlyUsage > 0
@@ -149,13 +153,15 @@ function renderInputs() {
     : usage != null ? `≈ 월 ${int(usage)}kWh 사용` : '';
 
   $('more-state').textContent = `방향 ${ORIENTATION[state.orientation].short} · 그늘 ${SHADE[state.shade].short}`;
-  const [lo, , hi] = calcConsts().pr;
+  const [lo, , hi] = c.pr;
   $('adv-pr-range').textContent = `범위 ${lo.toFixed(2)}~${hi.toFixed(2)}`;
   $('adv-unit-note').textContent = state.monthlyUsage > 0 || usage != null
     ? '지금은 전기요금으로 누진제 계산을 해서 이 값은 안 써요'
     : '전기요금을 안 넣었을 때만 써요 (누진 2단계 + 부가요금 기준)';
-  $('adv-subsidy').disabled = !state.useSubsidy;
-  $('adv-subsidy-note').textContent = `가구당 ${DEFAULTS.subsidyMaxKw}kW까지만 지원 · 금액은 연도·지자체마다 달라 공고를 확인하세요`;
+  const estimate = subsidyEstimate(state.panelCount, c);
+  $('adv-subsidy').placeholder = int(estimate);
+  $('adv-subsidy-note').textContent = `비워 두면 국비만 넣어요: ${Math.min(kw, c.subsidyMaxKw).toFixed(2)} kW(세대당 ${c.subsidyMaxKw}kW까지) × kW당 ${won(c.subsidyPerKw)} = ${won(estimate)}. `
+    + '시·도·군 보조금도 받는다면 합친 금액을 넣으세요 — 지역에 따라 자부담이 크게 줄어요.';
 }
 
 let lastMonthly = null;
@@ -238,7 +244,10 @@ function renderSteps(r, c) {
     steps.push(['절감액', `전기요금을 몰라 발전량 전부를 kWh당 ${int(c.unitPrice)}원으로 계산: ${int(m.yearlyKwh)} kWh × ${int(c.unitPrice)}원 = 연 ${won(m.yearlyWon)}`]);
   }
 
-  const subsidy = m.subsidy > 0 ? ` − 보조금 ${won(m.subsidy)} (${f2(m.subsidyKw)} kW × ${won(c.subsidyPerKw)}) = ${won(m.totalCost)}` : '';
+  const source = state.subsidyTotal != null
+    ? '직접 넣은 총액'
+    : `국비 추정 ${f2(Math.min(m.capacityKw, c.subsidyMaxKw))} kW × ${won(c.subsidyPerKw)}`;
+  const subsidy = m.subsidy > 0 ? ` − 보조금 ${won(m.subsidy)}(${source}) = 자부담 ${won(m.totalCost)}` : '';
   steps.push(['총비용', `${state.panelCount}장 × ${won(state.pricePerPanel)} = ${won(m.grossCost)}${subsidy}`]);
   steps.push(['손익분기', Number.isFinite(m.breakEvenDays)
     ? `${won(m.totalCost)} ÷ 하루 ${won(m.dailyWon)} = ${int(m.breakEvenDays)}일 (${years(m.breakEvenDays)})`
@@ -284,6 +293,7 @@ function buildSegments(container, name, table, key) {
 function showChip(on) {
   $('region-combo').hidden = on;
   $('region-chip').hidden = !on;
+  $('region-note').hidden = !on;
   if (on) {
     $('chip-name').textContent = state.region.name;
     $('chip-psh').textContent = state.region.annual.toFixed(2);
@@ -318,8 +328,14 @@ bindNumber($('adv-watt'), 'panelWatt', { min: 50, max: 1000 });
 bindNumber($('adv-pr'), 'prMid', { min: 0.5, max: 0.95, decimals: 2 });
 bindNumber($('adv-unit'), 'unitPrice', { min: 0, max: 2000 });
 bindNumber($('adv-usage'), 'monthlyUsage', { min: 0, max: 5000, optional: true });
-bindNumber($('adv-subsidy'), 'subsidyPerKw', { min: 0, max: 9_999_999, commas: true });
+bindNumber($('adv-subsidy'), 'subsidyTotal', { min: 0, max: 99_999_999, commas: true, optional: true });
 $('adv-subsidy-on').addEventListener('change', (e) => { state.useSubsidy = e.target.checked; changed(); });
+// 금액을 넣으면 적용도 켠다 — 넣고 체크를 깜빡하는 경우가 많다
+$('adv-subsidy').addEventListener('input', () => {
+  if (state.subsidyTotal == null || state.useSubsidy) return;
+  state.useSubsidy = $('adv-subsidy-on').checked = true;
+  changed();
+});
 
 buildSegments($('seg-orientation'), 'orientation', ORIENTATION, 'orientation');
 buildSegments($('seg-shade'), 'shade', SHADE, 'shade');
