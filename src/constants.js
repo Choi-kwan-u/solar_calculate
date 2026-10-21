@@ -12,7 +12,8 @@ export const DEFAULTS = {
   panelLifeYears: 25,
 };
 
-export const PANELS = { min: 1, max: 40, initial: 7 }; // 450W × 7 ≈ 3kW
+export const PANELS = { min: 1, max: 100, initial: 7 }; // 450W × 7 ≈ 3kW
+export const NET_METERING_MAX_KW = 10; // 이 용량까지 상계거래(잉여는 이월만). 넘으면 잉여 현금정산 대상
 
 // 방향 계수 — 수평면 일사량 대비. pvlib 서울 1년 시간별 시뮬레이션(Perez, 경사 30°, 평지붕은 거치대 15°).
 // 키 순서가 화면 선택지 순서다.

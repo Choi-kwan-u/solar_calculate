@@ -204,6 +204,10 @@ details[open] > summary .chev { transform: rotate(90deg); }
 .more-state { margin-left: auto; color: var(--text); }
 
 .seg-field { margin: 14px 0 0; padding: 0; border: 0; min-width: 0; }
+.seg-field.first { margin-top: 0; }
+.seg-field legend.label { display: flex; margin-bottom: 8px; font-size: 14px; color: var(--text-2); }
+.subsidy-custom { margin-top: 8px; }
+.help a { color: var(--text); }
 .seg-field legend { padding: 0; margin-bottom: 6px; font-size: 14px; color: var(--text-2); }
 .seg { display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--seg-track); border: 1px solid var(--line); }
 .seg label { position: relative; flex: 1; min-width: 0; }

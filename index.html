@@ -69,6 +69,20 @@
           <p class="help tnum" id="bill-usage"></p>
         </div>
 
+        <div class="field">
+          <fieldset class="seg-field first">
+            <legend class="label"><span class="badge num" aria-hidden="true">5</span>보조금</legend>
+            <div class="seg" id="seg-subsidy"></div>
+          </fieldset>
+          <div class="subsidy-custom" id="subsidy-custom" hidden>
+            <span class="suffix-input">
+              <input class="input" id="subsidy-total" type="text" inputmode="numeric" maxlength="11" autocomplete="off" aria-label="총 보조금" />
+              <span class="suffix">원</span>
+            </span>
+          </div>
+          <p class="help" id="subsidy-note"></p>
+        </div>
+
         <details class="more" id="more">
           <summary><span class="chev" data-icon="chevronRight"></span><span>지붕 방향·그늘</span><span class="more-state" id="more-state"></span></summary>
           <fieldset class="seg-field">
@@ -106,6 +120,8 @@
           <div class="hints">
             <button type="button" class="hint" id="hint-bill" hidden>전기요금을 넣으면 더 정확해요</button>
             <button type="button" class="hint" id="hint-more" hidden>방향·그늘을 고르면 범위가 좁아져요</button>
+            <button type="button" class="hint" id="hint-subsidy" hidden></button>
+            <p class="hint-note" id="hint-net" hidden></p>
             <p class="hint-note" id="hint-life" hidden></p>
           </div>
         </div>
@@ -162,15 +178,6 @@
               <p class="help">요금 대신 kWh를 알면 여기에. 넣으면 전기요금보다 우선해요.</p>
             </div>
 
-            <label for="adv-subsidy-on">보조금 적용</label>
-            <div>
-              <div class="inline">
-                <input type="checkbox" id="adv-subsidy-on" />
-                <span>총</span>
-                <input class="input w-money" id="adv-subsidy" type="text" inputmode="numeric" aria-label="총 보조금" /><span class="unit-out">원</span>
-              </div>
-              <p class="help" id="adv-subsidy-note"></p>
-            </div>
           </div>
 
           <h3>고정 값</h3>

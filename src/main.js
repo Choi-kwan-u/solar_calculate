@@ -4,7 +4,7 @@ import './fonts/fonts.css';
 import './style.css';
 import data from '../data/psh.json';
 import { calculate, maxUsefulPanels, subsidyEstimate, subsidyOf, usageFromBill, DAYS } from './calc.js';
-import { DEFAULTS, ORIENTATION, PANELS, SHADE, TARIFF } from './constants.js';
+import { DEFAULTS, NET_METERING_MAX_KW, ORIENTATION, PANELS, SHADE, TARIFF } from './constants.js';
 import { buildIndex, mountSearch } from './search.js';
 import { renderHorizon, renderMonthly } from './chart.js';
 import { mountIcons } from './icons/index.js';
@@ -21,8 +21,13 @@ const ADVANCED = {
   prMid: DEFAULTS.pr[1],
   unitPrice: DEFAULTS.unitPrice,
   monthlyUsage: null,
-  useSubsidy: false,
-  subsidyTotal: null, // 국비+지방비 총액. null이면 국비 추정
+};
+
+// 보조금 선택지(첫 화면 ⑤). 기본은 안 받음 — 받으면 얼마나 짧아지는지는 결과에서 따로 보여 준다
+const SUBSIDY = {
+  none: { short: '안 받음' },
+  national: { short: '국비만' },
+  custom: { short: '직접 입력' },
 };
 
 const state = {
@@ -32,6 +37,8 @@ const state = {
   monthlyBill: null,
   orientation: 'unknown',
   shade: 'unknown',
+  subsidyMode: 'none',
+  subsidyTotal: null, // 직접 입력한 총액(국비+지방비). 비우면 국비 추정
   ...ADVANCED,
 };
 
@@ -42,8 +49,8 @@ const calcInput = () => ({
   monthlyUsage: state.monthlyUsage,
   orientation: state.orientation,
   shade: state.shade,
-  useSubsidy: state.useSubsidy,
-  subsidyTotal: state.subsidyTotal,
+  useSubsidy: state.subsidyMode !== 'none',
+  subsidyTotal: state.subsidyMode === 'custom' ? state.subsidyTotal : null,
 });
 
 const calcConsts = () => ({
@@ -160,9 +167,18 @@ function renderInputs() {
     ? '지금은 전기요금으로 누진제 계산을 해서 이 값은 안 써요'
     : '전기요금을 안 넣었을 때만 써요 (누진 2단계 + 부가요금 기준)';
   const estimate = subsidyEstimate(state.panelCount, c);
-  $('adv-subsidy').placeholder = int(estimate);
-  $('adv-subsidy-note').textContent = `비워 두면 국비만 넣어요: ${Math.min(kw, c.subsidyMaxKw).toFixed(2)} kW(세대당 ${c.subsidyMaxKw}kW까지) × kW당 ${won(c.subsidyPerKw)} = ${won(estimate)}. `
-    + '시·도·군 보조금도 받는다면 합친 금액을 넣으세요 — 지역에 따라 자부담이 크게 줄어요.';
+  $('subsidy-custom').hidden = state.subsidyMode !== 'custom';
+  $('subsidy-total').placeholder = `예: ${int(estimate)}`;
+  const notes = {
+    none: '받을 예정이면 고르세요. 국비는 세대당 3kW까지, 시·도·군 지원은 지역마다 달라요.',
+    national: `국비 추정 ${won(estimate)} = ${Math.min(kw, c.subsidyMaxKw).toFixed(2)} kW(세대당 ${c.subsidyMaxKw}kW까지) × kW당 ${won(c.subsidyPerKw)}. 예산이 소진되면 마감돼요.`,
+    custom: '국비 + 시·도비 + 시·군·구비를 합친 금액이에요. 견적서나 지자체 공고에서 확인하세요 — 지자체 지원까지 받으면 자부담이 크게 줄어요.',
+  };
+  const note = $('subsidy-note');
+  note.textContent = notes[state.subsidyMode] + ' ';
+  note.append(Object.assign(document.createElement('a'), {
+    href: 'https://www.knrec.or.kr/biz/pds/notice/list.do', target: '_blank', rel: 'noopener', textContent: '에너지공단 주택지원 공고',
+  }));
 }
 
 let last = null;          // 마지막 결과 — 창 크기가 바뀌면 그래프만 다시 그린다
@@ -206,6 +222,17 @@ function renderResults() {
   $('hint-more').hidden = !finite || fast === slow || (state.orientation !== 'unknown' && state.shade !== 'unknown');
   $('hint-life').hidden = !(finite && m.breakEvenDays / 365 > c.panelLifeYears);
   $('hint-life').textContent = `패널 수명(${c.panelLifeYears}년) 안에 본전을 찾기 어려워요`;
+
+  // 보조금을 안 고른 사람에게: 국비만 받아도 얼마나 짧아지는지
+  const hs = $('hint-subsidy');
+  hs.hidden = state.subsidyMode !== 'none' || !finite;
+  if (!hs.hidden) {
+    const alt = calculate({ ...input, useSubsidy: true, subsidyTotal: null }, region, c);
+    hs.textContent = `국비 보조금(약 ${approxWon(alt.mid.subsidy).join('')})만 받아도 ${breakEven(alt.breakEvenRange, alt.mid.breakEvenDays).main}`;
+  }
+  const net = $('hint-net');
+  net.hidden = m.capacityKw <= NET_METERING_MAX_KW;
+  net.textContent = `${m.capacityKw.toFixed(1)}kW는 ${NET_METERING_MAX_KW}kW를 넘어 상계거래 대상이 아닐 수 있어요. 남는 전기를 현금으로 정산받으면 실제 이득이 이 계산(이월만 반영)보다 커져요.`;
 
   renderSurplus(m, input, c);
   const years = m.breakEvenDays / 365;
@@ -289,7 +316,7 @@ function renderSteps(r, c) {
     steps.push(['절감액', `전기요금을 몰라 발전량 전부를 kWh당 ${int(c.unitPrice)}원으로 계산: ${int(m.yearlyKwh)} kWh × ${int(c.unitPrice)}원 = 연 ${won(m.yearlyWon)}`]);
   }
 
-  const source = state.subsidyTotal != null
+  const source = state.subsidyMode === 'custom' && state.subsidyTotal != null
     ? '직접 넣은 총액'
     : `국비 추정 ${f2(Math.min(m.capacityKw, c.subsidyMaxKw))} kW × ${won(c.subsidyPerKw)}`;
   const subsidy = m.subsidy > 0 ? ` − 보조금 ${won(m.subsidy)}(${source}) = 자부담 ${won(m.totalCost)}` : '';
@@ -325,7 +352,7 @@ function renderFixed() {
 function buildSegments(container, name, table, key) {
   for (const [value, o] of Object.entries(table)) {
     const label = document.createElement('label');
-    label.title = o.label;
+    label.title = o.label ?? o.short;
     const radio = Object.assign(document.createElement('input'), { type: 'radio', name, value, checked: state[key] === value });
     radio.addEventListener('change', () => { state[key] = value; changed(); });
     label.append(radio, span('', o.short));
@@ -373,21 +400,21 @@ bindNumber($('adv-watt'), 'panelWatt', { min: 50, max: 1000 });
 bindNumber($('adv-pr'), 'prMid', { min: 0.5, max: 0.95, decimals: 2 });
 bindNumber($('adv-unit'), 'unitPrice', { min: 0, max: 2000 });
 bindNumber($('adv-usage'), 'monthlyUsage', { min: 0, max: 5000, optional: true });
-bindNumber($('adv-subsidy'), 'subsidyTotal', { min: 0, max: 99_999_999, commas: true, optional: true });
-$('adv-subsidy-on').addEventListener('change', (e) => { state.useSubsidy = e.target.checked; changed(); });
-// 금액을 넣으면 적용도 켠다 — 넣고 체크를 깜빡하는 경우가 많다
-$('adv-subsidy').addEventListener('input', () => {
-  if (state.subsidyTotal == null || state.useSubsidy) return;
-  state.useSubsidy = $('adv-subsidy-on').checked = true;
-  changed();
-});
+bindNumber($('subsidy-total'), 'subsidyTotal', { min: 0, max: 99_999_999, commas: true, optional: true });
 
 buildSegments($('seg-orientation'), 'orientation', ORIENTATION, 'orientation');
 buildSegments($('seg-shade'), 'shade', SHADE, 'shade');
+buildSegments($('seg-subsidy'), 'subsidy', SUBSIDY, 'subsidyMode');
+$('seg-subsidy').addEventListener('change', () => { if (state.subsidyMode === 'custom') $('subsidy-total').focus(); });
+$('hint-subsidy').addEventListener('click', () => {
+  state.subsidyMode = 'national';
+  document.querySelector('#seg-subsidy input[value=national]').checked = true;
+  changed();
+  $('seg-subsidy').scrollIntoView(scrollOpts());
+});
 
 $('reset').addEventListener('click', () => {
   Object.assign(state, ADVANCED);
-  $('adv-subsidy-on').checked = false;
   refreshFields.forEach((show) => show());
   changed();
 });
